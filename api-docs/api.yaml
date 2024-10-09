@@ -1,0 +1,253 @@
+openapi: 3.0.0
+info:
+  title: UniEvent API
+  description: Documentação da API UniEvent.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+
+components:
+  schemas:
+    InternalServerErrorSchema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Internal Server Error
+    BadRequestErrorSchema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Invalid Request
+    NotFoundErrorSchema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Not Found
+    UnauthorizedErrorSchema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Unauthorized
+    MessageSuccessSchema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Successful Request
+    EventSchema:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id do evento
+          example: "82c273fb-f95c-4520-a0d1-302bf6084b51"
+        title:
+          type: string
+          description: Título do evento
+          example: "Conferência Acme"
+        description:
+          type: string
+          description: Descrição do evento
+          example: "Evento anual da Acme"
+        startDate:
+          type: string
+          description: Data de início do evento
+          example: "2024-01-20"
+        endDate:
+          type: string
+          description: Data de fim do evento
+          example: "2024-01-25"
+        vacancies:
+          type: number
+          description: Quantidade de vagas do evento
+          example: 300
+        created_at:
+          type: string
+          description: Data de criação do evento
+          example: "2024-01-23 02:45:02"
+    EventInsertSchema:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Título do evento. Tem que ser único para cada evento.
+          example: "Conferência Acme"
+        description:
+          type: string
+          description: Descrição do evento
+          example: "Evento anual da Acme"
+        startDate:
+          type: string
+          description: Data de início do evento
+          example: "2024-01-20"
+        endDate:
+          type: string
+          description: Data de fim do evento. Não pode ser menor que a data de início do evento.
+          example: "2024-01-25"
+        vacancies:
+          type: number
+          description: Quantidade de vagas do evento
+          example: 300
+      required:
+        - title
+        - startDate
+        - endDate
+        - vacancies
+  parameters:
+    EventIDPathParamSchema:
+      name: eventID
+      in: path
+      required: true
+      description: ID do evento
+      example: fa5c9bcb-84a0-4297-89f5-0ed1ba9ec24a
+      schema:
+        type: string
+
+paths:
+  /events:
+    get:
+      tags:
+        - Eventos
+      summary: Obter eventos
+      parameters:
+        - in: query
+          name: title
+          schema:
+            type: string
+          description: Título do evento
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EventSchema"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorSchema"
+    post:
+      tags:
+        - Eventos
+      summary: Criar evento
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventInsertSchema"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventSchema"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorSchema"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorSchema"
+
+  /events/{eventID}:
+    get:
+      tags:
+        - Eventos
+      summary: Obter evento
+      parameters:
+        - name: eventID
+          $ref: "#/components/parameters/EventIDPathParamSchema"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventSchema"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorSchema"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorSchema"
+    put:
+      tags:
+        - Eventos
+      summary: Atualizar evento
+      parameters:
+        - name: eventID
+          $ref: "#/components/parameters/EventIDPathParamSchema"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventInsertSchema"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventSchema"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorSchema"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorSchema"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorSchema"
+    delete:
+      tags:
+        - Eventos
+      summary: Remover evento
+      parameters:
+        - name: eventID
+          $ref: "#/components/parameters/EventIDPathParamSchema"
+      responses:
+        "204":
+          description: Not Content
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorSchema"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorSchema"
